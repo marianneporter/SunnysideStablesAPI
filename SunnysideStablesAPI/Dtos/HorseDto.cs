@@ -14,7 +14,6 @@ namespace SunnysideStablesAPI.Dtos
         public string Colour { get; set; }
         public double Heightcm { get; set; }
         public ICollection<OwnerDto> Owners { get; set; }
-        public DateTime CreatedDate { get; set; }
-        public DateTime ModifiedDate { get; set; }
+   
     }
 }

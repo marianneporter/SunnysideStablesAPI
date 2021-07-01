@@ -26,7 +26,6 @@ namespace SunnysideStablesAPI.Controllers
             _mapper = mapper;
         }
 
-        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetHorses()
         {

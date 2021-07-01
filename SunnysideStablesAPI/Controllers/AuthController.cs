@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -16,6 +17,7 @@ using System.Threading.Tasks;
 namespace SunnysideStablesAPI.Controllers
 {
     [Route("api/[controller]")]
+    [AllowAnonymous]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -52,8 +54,10 @@ namespace SunnysideStablesAPI.Controllers
                 return Ok(new
                 {
                     token = generatedToken,
-                    firstName = user.FirstName,
-                    lastName = user.LastName
+                    user = new {
+                        firstName = user.FirstName,
+                        lastName = user.LastName
+                    } 
                 });
             }
 

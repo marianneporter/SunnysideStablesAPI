@@ -87,6 +87,8 @@ namespace SunnysideStablesAPI
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "SunnysideStablesAPI", Version = "v1" });
             });
+
+            services.AddCors();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -102,6 +104,11 @@ namespace SunnysideStablesAPI
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            if (env.IsDevelopment())
+            {
+                app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            }
 
             app.UseAuthentication();
             app.UseAuthorization();
