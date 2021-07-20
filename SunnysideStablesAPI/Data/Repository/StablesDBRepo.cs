@@ -15,13 +15,20 @@ namespace SunnysideStablesAPI.Data.Repository
         {
             _context = context;
         }
-        public async Task<List<Horse>> GetHorses(bool includeOwners=true)
+        public async Task<List<Horse>> GetHorses(bool includeOwners=true, int pageIndex=0, int pageSize=3)
         {
             var horses= await _context.Horse
                           .Include(o => o.HorseOwner)
                           .ThenInclude(o => o.Owner)
-                          .OrderBy(h => h.Name).ToListAsync();
+                          .OrderBy(h => h.Name)
+                          .Skip(pageIndex * pageSize)
+                          .Take(pageSize).ToListAsync();
             return horses;
+        }
+
+        public async Task<int> GetHorseCount()
+        {
+            return await _context.Horse.CountAsync();
         }
     }
 }
