@@ -124,6 +124,9 @@ namespace SunnysideStablesAPI.Migrations
                     b.Property<double>("Heightcm")
                         .HasColumnType("float");
 
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");
 

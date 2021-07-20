@@ -10,7 +10,7 @@ using SunnysideStablesAPI.Data;
 namespace SunnysideStablesAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20210612150148_initial")]
+    [Migration("20210720103136_initial")]
     partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -125,6 +125,9 @@ namespace SunnysideStablesAPI.Migrations
 
                     b.Property<double>("Heightcm")
                         .HasColumnType("float");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("ModifiedDate")
                         .HasColumnType("datetime2");

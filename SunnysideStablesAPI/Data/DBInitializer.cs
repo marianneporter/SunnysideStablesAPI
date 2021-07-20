@@ -29,14 +29,14 @@ namespace SunnysideStablesAPI.Data
 
         public static void CreateHorses(AppDbContext context)
         {
-          
+
             var horse = new Horse
             {
                 Name = "Bella",
                 DOB = new DateTime(2011, 06, 24),
                 Sex = "Mare",
                 Colour = "Grey",
-                Heightcm =  144.272,   
+                Heightcm = 144.272,
                 CreatedDate = DateTime.Now,
                 ModifiedDate = DateTime.Now
             };
@@ -53,8 +53,7 @@ namespace SunnysideStablesAPI.Data
                 CreatedDate = DateTime.Now,
                 ModifiedDate = DateTime.Now
             };
-            context.Add(horse);
-       
+            context.Add(horse);       
  
 
             horse = new Horse

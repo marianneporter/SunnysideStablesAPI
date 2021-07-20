@@ -63,6 +63,7 @@ namespace SunnysideStablesAPI.Migrations
                     Sex = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Colour = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     Heightcm = table.Column<double>(type: "float", nullable: false),
+                    ImageUrl = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     CreatedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     ModifiedDate = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
