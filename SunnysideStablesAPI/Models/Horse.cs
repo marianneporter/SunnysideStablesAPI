@@ -15,5 +15,17 @@ namespace SunnysideStablesAPI.Models
         public ICollection<HorseOwner> HorseOwner { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }
+
+        public string HeightHands
+        {
+            get
+            {
+                var heightInInches = Math.Round(Heightcm * 0.3937007874);
+                var wholeHands = Math.Truncate(heightInInches / 4);
+                var remainingInches = heightInInches - (wholeHands * 4);
+                return $"{wholeHands}.{remainingInches}";
+            }
+
+        }
     }
 }

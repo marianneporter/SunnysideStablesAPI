@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using SunnysideStablesAPI.Dtos;
 using SunnysideStablesAPI.Models;
+using System.Linq;
 
 namespace SunnysideStablesAPI.Utility
 {
@@ -13,7 +10,9 @@ namespace SunnysideStablesAPI.Utility
         public AutoMapperProfiles()
         {
             CreateMap<Horse, HorseDto>()
-                .ForMember(dest => dest.Owners, opt => opt.MapFrom(x => x.HorseOwner.Select(y => y.Owner).ToList()))
+                .ForMember(dest => dest.Owners, 
+                           opt => opt.MapFrom(x => x.HorseOwner.Select(y => $"{y.Owner.FirstName} {y.Owner.LastName}").ToList()))
+         //       .ForMember(dest=>dest.DOB, opt => opt.MapFrom(d=> d.DOB.ToString("yyyy-MM-dd")))
                 .ReverseMap();
 
             CreateMap<Owner, OwnerDto>();
