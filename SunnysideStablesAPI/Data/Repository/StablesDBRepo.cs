@@ -30,5 +30,22 @@ namespace SunnysideStablesAPI.Data.Repository
         {
             return await _context.Horse.CountAsync();
         }
+
+        public void Add(Horse horseToAdd)
+        {
+            _context.Add(horseToAdd);
+        }
+
+
+        public async Task<bool> Commit()
+        {
+            var rowsChanged = await _context.SaveChangesAsync();
+            return rowsChanged > 0;
+        }
+
+        public void AddHorseOwners(List<HorseOwner> horseOwners)
+        {
+            horseOwners.ForEach(o => _context.Add(o);
+        }
     }
 }

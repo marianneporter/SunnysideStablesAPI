@@ -11,5 +11,10 @@ namespace SunnysideStablesAPI.Data.Repository
         Task<List<Horse>> GetHorses(bool includeOwners=false, int pageIndex=0, int pageSize=3);
 
         Task<int> GetHorseCount();
+
+        void Add(Horse horseToAdd);
+
+        Task<bool> Commit();
+        void AddHorseOwners(List<HorseOwner> horseOwners);
     }
 }
