@@ -17,20 +17,6 @@ namespace SunnysideStablesAPI.Models
         public DateTime DOB { get; set; }
         public string Sex  { get; set; }
         public string Colour { get; set; }
-
-        //private double _heightcm;
-        //public double Heightcm {
-        //    get { return _heightcm; }
-        //    set
-        //    {
-                
-        //        string[] parts = HeightHands.Trim().Split('.');
-        //        var heightInches = (Int32.Parse(parts[0]) * 4) + Int32.Parse(parts[1]);
-        //        _heightcm = heightInches * 2.54; ;
-        //    } 
-        //}
-        //
-
         public double Heightcm { get; set; }
         public string ImageUrl { get; set; }
         public ICollection<HorseOwner> HorseOwner { get; set; }

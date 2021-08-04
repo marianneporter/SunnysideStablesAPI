@@ -45,7 +45,12 @@ namespace SunnysideStablesAPI.Data.Repository
 
         public void AddHorseOwners(List<HorseOwner> horseOwners)
         {
-            horseOwners.ForEach(o => _context.Add(o);
+            horseOwners.ForEach(o => _context.Add(o));
+        }
+
+        public async Task<List<Owner>> GetOwners()
+        {
+            return await _context.Owners.ToListAsync();          
         }
     }
 }

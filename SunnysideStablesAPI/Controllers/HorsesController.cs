@@ -1,12 +1,18 @@
 ﻿using AutoMapper;
+using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Configuration;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
 using SunnysideStablesAPI.Data.Repository;
 using SunnysideStablesAPI.Dtos;
 using SunnysideStablesAPI.Models;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -19,12 +25,15 @@ namespace SunnysideStablesAPI.Controllers
     {
         private readonly IStablesRepo _repo;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _config;
 
         public HorsesController(IStablesRepo repo,
-                                IMapper mapper)
+                                IMapper mapper,
+                                IConfiguration config)
         {
             _repo = repo;
             _mapper = mapper;
+            _config = config;
         }
 
         [HttpGet]
@@ -61,7 +70,7 @@ namespace SunnysideStablesAPI.Controllers
                 return StatusCode(500);
             }
 
-            //add cottage owner entitie(s)  
+            //add horse owner entitie(s)  
 
             List<HorseOwner> horseOwners = horseAddUpdateDto.OwnerIds.Select(o =>
                                 new HorseOwner
@@ -70,18 +79,55 @@ namespace SunnysideStablesAPI.Controllers
                                     OwnerId = o
                                 }).ToList();
 
+            _repo.AddHorseOwners(horseOwners);            
 
-            _repo.AddHorseOwners(horseOwners);
+            // image to blob storage
 
-             await _repo.Commit();
+            if (horseAddUpdateDto.ImageFile != null)
+            {
+                var photoUrl = await SavePhoto(horseAddUpdateDto.ImageFile, horseToAdd.Id, horseToAdd.Name);
 
- 
+                if (!String.IsNullOrEmpty(photoUrl)) // photo saved successfully
+                {
+                    horseToAdd.ImageUrl = photoUrl;
+                }
+            }
 
-            // photo into blob storage if required
-            // 
+            await _repo.Commit();
 
             return StatusCode(201);
 
+        }
+
+
+        private async Task<string> SavePhoto(IFormFile uploadedPhoto, int id, string horseName)
+        {
+
+            var filename = horseName.Replace(" ", String.Empty).ToLower() + '_' + id.ToString() + ".jpg";
+
+            var azureConnectionString = _config.GetConnectionString("AzureStorageConnection");
+            var azureContainer = _config.GetValue<string>("StorageContainer");
+
+            var container = new BlobContainerClient(azureConnectionString, azureContainer);
+            var blob = container.GetBlobClient(filename);
+            await blob.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots);
+
+            using (var stream = uploadedPhoto.OpenReadStream())
+            {
+                using (var output = new MemoryStream())
+                using (Image image = Image.Load(stream))
+                {
+                    image.Mutate(x => x.Resize(600, 450));
+                    image.SaveAsJpeg(output);
+                    output.Position = 0;
+                    await blob.UploadAsync(output, new BlobHttpHeaders { ContentType = "image/jpeg" });
+                }
+            }
+
+
+            var blobUrl = blob.Uri.AbsoluteUri;
+
+            return blobUrl;
         }
     }
 }
