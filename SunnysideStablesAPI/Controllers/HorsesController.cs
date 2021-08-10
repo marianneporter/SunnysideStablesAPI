@@ -95,7 +95,7 @@ namespace SunnysideStablesAPI.Controllers
 
             await _repo.Commit();
 
-            return StatusCode(201);
+            return Created("~api/horses", new { id = horseToAdd.Id, name = horseToAdd.Name });
 
         }
 
