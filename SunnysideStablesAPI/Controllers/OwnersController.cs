@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
@@ -8,9 +7,7 @@ using SunnysideStablesAPI.Data.Repository;
 using SunnysideStablesAPI.Dtos;
 using SunnysideStablesAPI.Models;
 using SunnysideStablesAPI.Models.Identity;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace SunnysideStablesAPI.Controllers
@@ -36,6 +33,7 @@ namespace SunnysideStablesAPI.Controllers
             _config = config;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetOwners()
         {
@@ -45,7 +43,7 @@ namespace SunnysideStablesAPI.Controllers
 
         }
 
-
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> AddOwner(OwnerDto ownerDto)
         {
@@ -57,16 +55,16 @@ namespace SunnysideStablesAPI.Controllers
                 LastName = ownerDto.LastName
             };
 
-            var result = _userManager.CreateAsync(owner, _config["InitialOwnerPassword"]).Result;
+            var result = await _userManager.CreateAsync(owner, _config["InitialOwnerPassword"]);
 
             if (result != IdentityResult.Success)
             {
                 return StatusCode(500);
             }
 
-            var addedOwner = _userManager.FindByEmailAsync(ownerDto.Email).Result;
+            var addedOwner = await _userManager.FindByEmailAsync(ownerDto.Email);
 
-            _userManager.AddToRolesAsync(addedOwner, new string[] { "Client" }).Wait();
+            await _userManager.AddToRolesAsync(addedOwner, new string[] { "Client" });
 
             return Ok(_mapper.Map<OwnerDto>(addedOwner));
         }

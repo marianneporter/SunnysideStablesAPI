@@ -52,5 +52,10 @@ namespace SunnysideStablesAPI.Data.Repository
         {
             return await _context.Owners.ToListAsync();          
         }
+
+        public async Task<Horse> GetHorseById(int id)
+        {
+            return await _context.Horse.FirstOrDefaultAsync(h => h.Id == id);
+        }
     }
 }
