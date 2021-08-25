@@ -60,5 +60,16 @@ namespace SunnysideStablesAPI.Data.Repository
                           .ThenInclude(o => o.Owner)
                           .FirstOrDefaultAsync(h => h.Id == id);
         }
+
+        public void AddHorseOwner(HorseOwner horseOwner)
+        {
+            _context.Add(horseOwner);
+        }
+
+        public void DeleteHorseOwner(HorseOwner horseOwner)
+        {
+            _context.Remove(horseOwner);
+        }
+
     }
 }

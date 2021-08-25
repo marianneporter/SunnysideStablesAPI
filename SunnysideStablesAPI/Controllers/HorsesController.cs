@@ -111,48 +111,21 @@ namespace SunnysideStablesAPI.Controllers
 
         }
 
-        //[HttpPatch]
-        //public async Task<IActionResult> UpdateHorse([FromForm] HorseAddUpdateDto horseAddUpdateDto)
-        //{
-        //    Horse horseToUpdate = _mapper.Map<Horse>(horseAddUpdateDto);
+        [AllowAnonymous]
+        [HttpPatch]
+        public async Task<IActionResult> UpdateHorse([FromForm] HorseAddUpdateDto horseAddUpdateDto)
+        {
+            Horse horseToUpdate = await _repo.GetHorseById(horseAddUpdateDto.Id);
 
-        //    _repo.Add(horseToAdd);
+            horseToUpdate = _mapper.Map<HorseAddUpdateDto, Horse>(horseAddUpdateDto, horseToUpdate);
 
-        //    var addSuccess = await _repo.Commit();
+            await _repo.Commit();
 
-        //    if (!addSuccess)
-        //    {
-        //        return StatusCode(500);
-        //    }
+            await CheckAndUpdateOwners(horseToUpdate, horseAddUpdateDto.OwnerIds.ToArray());  
 
-        //    //add horse owner entitie(s)  
+            return StatusCode(200);
 
-        //    List<HorseOwner> horseOwners = horseAddUpdateDto.OwnerIds.Select(o =>
-        //                        new HorseOwner
-        //                        {
-        //                            HorseId = horseToAdd.Id,
-        //                            OwnerId = o
-        //                        }).ToList();
-
-        //    _repo.AddHorseOwners(horseOwners);
-
-        //    // image to blob storage
-
-        //    if (horseAddUpdateDto.ImageFile != null)
-        //    {
-        //        var photoUrl = await SavePhoto(horseAddUpdateDto.ImageFile, horseToAdd.Id, horseToAdd.Name);
-
-        //        if (!String.IsNullOrEmpty(photoUrl)) // photo saved successfully
-        //        {
-        //            horseToAdd.ImageUrl = photoUrl;
-        //        }
-        //    }
-
-        //    await _repo.Commit();
-
-        //    return Created("~api/horses", new { id = horseToAdd.Id, name = horseToAdd.Name });
-
-        //}
+        }
 
         private async Task<string> SavePhoto(IFormFile uploadedPhoto, int id, string horseName)
         {
@@ -183,5 +156,39 @@ namespace SunnysideStablesAPI.Controllers
 
             return blobUrl;
         }
+
+        private async Task CheckAndUpdateOwners(Horse horseToUpdate, int[] ownerIds)
+        {
+            var ownersChanged = false;
+            var currentOwnerIds = horseToUpdate.HorseOwner.Select(i => i.OwnerId).ToList();
+            for (int i = 0; i<ownerIds.Length; i++)
+            {
+                if (!currentOwnerIds.Contains(ownerIds[i]))
+                {
+                   
+                    HorseOwner horseOwner = new HorseOwner()
+                    {
+                        HorseId = horseToUpdate.Id,
+                        OwnerId = ownerIds[i]
+                    };
+                    _repo.AddHorseOwner(horseOwner);
+                    ownersChanged = true;
+                }
+            }
+
+            var deletedOwnerIds = currentOwnerIds.Where(o => !ownerIds.Contains(o)).ToList();
+            for (int i = 0; i< deletedOwnerIds.Count; i++)
+            {
+                var ownerToRemove = horseToUpdate.HorseOwner.First(o => o.OwnerId == deletedOwnerIds[i]);
+                ownersChanged = true;
+                _repo.DeleteHorseOwner(ownerToRemove);
+            }
+
+            if (ownersChanged)
+            {
+                await _repo.Commit();
+            }
+           
+        } 
     }
 }

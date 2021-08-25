@@ -18,6 +18,10 @@ namespace SunnysideStablesAPI.Data.Repository
 
         void Add(Horse horseToAdd);
 
+        void AddHorseOwner(HorseOwner horseOwner);
+
+        void DeleteHorseOwner(HorseOwner horseOwner);
+
         Task<bool> Commit();
         void AddHorseOwners(List<HorseOwner> horseOwners);
     }

@@ -20,6 +20,7 @@ namespace SunnysideStablesAPI.Data
 
         public DbSet<Horse> Horse { get; set; }
         public DbSet<User> User { get; set; }
+
         public DbSet<Owner> Owners { get; set; }
         public DbSet<Staff> Staff { get; set; }
 
