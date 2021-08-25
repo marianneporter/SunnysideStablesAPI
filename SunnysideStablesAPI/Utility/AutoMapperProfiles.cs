@@ -12,7 +12,7 @@ namespace SunnysideStablesAPI.Utility
         {
             CreateMap<Horse, HorseDto>()
                 .ForMember(dest => dest.Owners,
-                           opt => opt.MapFrom(x => x.HorseOwner.Select(y => $"{y.Owner.FirstName} {y.Owner.LastName}").ToList()))
+                           opt => opt.MapFrom(x => x.HorseOwner.Select(y => y.Owner).ToList()))
                 .ReverseMap();
 
             CreateMap<HorseAddUpdateDto, Horse>()

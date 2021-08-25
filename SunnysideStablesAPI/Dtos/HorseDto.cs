@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+
 
 namespace SunnysideStablesAPI.Dtos
 {
@@ -15,7 +14,7 @@ namespace SunnysideStablesAPI.Dtos
         public double Heightcm { get; set; }
         public string HeightHands { get; set; }
         public string ImageUrl { get; set; }
-        public ICollection<string> Owners { get; set; }
+        public ICollection<OwnerDto> Owners { get; set; }
    
     }
 }

@@ -45,6 +45,7 @@ namespace SunnysideStablesAPI.Controllers
           
         }
 
+        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetHorseById(int id)
         {
@@ -110,6 +111,48 @@ namespace SunnysideStablesAPI.Controllers
 
         }
 
+        //[HttpPatch]
+        //public async Task<IActionResult> UpdateHorse([FromForm] HorseAddUpdateDto horseAddUpdateDto)
+        //{
+        //    Horse horseToUpdate = _mapper.Map<Horse>(horseAddUpdateDto);
+
+        //    _repo.Add(horseToAdd);
+
+        //    var addSuccess = await _repo.Commit();
+
+        //    if (!addSuccess)
+        //    {
+        //        return StatusCode(500);
+        //    }
+
+        //    //add horse owner entitie(s)  
+
+        //    List<HorseOwner> horseOwners = horseAddUpdateDto.OwnerIds.Select(o =>
+        //                        new HorseOwner
+        //                        {
+        //                            HorseId = horseToAdd.Id,
+        //                            OwnerId = o
+        //                        }).ToList();
+
+        //    _repo.AddHorseOwners(horseOwners);
+
+        //    // image to blob storage
+
+        //    if (horseAddUpdateDto.ImageFile != null)
+        //    {
+        //        var photoUrl = await SavePhoto(horseAddUpdateDto.ImageFile, horseToAdd.Id, horseToAdd.Name);
+
+        //        if (!String.IsNullOrEmpty(photoUrl)) // photo saved successfully
+        //        {
+        //            horseToAdd.ImageUrl = photoUrl;
+        //        }
+        //    }
+
+        //    await _repo.Commit();
+
+        //    return Created("~api/horses", new { id = horseToAdd.Id, name = horseToAdd.Name });
+
+        //}
 
         private async Task<string> SavePhoto(IFormFile uploadedPhoto, int id, string horseName)
         {
