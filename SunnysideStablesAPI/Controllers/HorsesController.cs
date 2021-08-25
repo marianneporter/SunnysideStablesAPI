@@ -116,14 +116,25 @@ namespace SunnysideStablesAPI.Controllers
         public async Task<IActionResult> UpdateHorse([FromForm] HorseAddUpdateDto horseAddUpdateDto)
         {
             Horse horseToUpdate = await _repo.GetHorseById(horseAddUpdateDto.Id);
+            if (horseToUpdate == null)
+            {
+                return NotFound($"Horse with Name {horseAddUpdateDto.Name} could not be found");
+            }
 
             horseToUpdate = _mapper.Map<HorseAddUpdateDto, Horse>(horseAddUpdateDto, horseToUpdate);
+            horseToUpdate.ModifiedDate = DateTime.Now;
 
-            await _repo.Commit();
+            var updateSuccess =await _repo.Commit();
 
-            await CheckAndUpdateOwners(horseToUpdate, horseAddUpdateDto.OwnerIds.ToArray());  
+            if (!updateSuccess)
+            {
+                return StatusCode(500);
+            }
 
-            return StatusCode(200);
+            updateSuccess = await CheckAndUpdateOwners(horseToUpdate, horseAddUpdateDto.OwnerIds.ToArray());
+
+            return updateSuccess ? NoContent() : StatusCode(500);
+
 
         }
 
@@ -157,7 +168,7 @@ namespace SunnysideStablesAPI.Controllers
             return blobUrl;
         }
 
-        private async Task CheckAndUpdateOwners(Horse horseToUpdate, int[] ownerIds)
+        private async Task<bool> CheckAndUpdateOwners(Horse horseToUpdate, int[] ownerIds)
         {
             var ownersChanged = false;
             var currentOwnerIds = horseToUpdate.HorseOwner.Select(i => i.OwnerId).ToList();
@@ -184,11 +195,14 @@ namespace SunnysideStablesAPI.Controllers
                 _repo.DeleteHorseOwner(ownerToRemove);
             }
 
+           
             if (ownersChanged)
             {
-                await _repo.Commit();
+                var updateSuccess = await _repo.Commit();
+                return updateSuccess;
             }
-           
+
+            return true;
         } 
     }
 }

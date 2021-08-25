@@ -55,6 +55,7 @@ namespace SunnysideStablesAPI.Data.Repository
 
         public async Task<Horse> GetHorseById(int id)
         {
+
             return await _context.Horse
                           .Include(o => o.HorseOwner)
                           .ThenInclude(o => o.Owner)
