@@ -13,5 +13,17 @@ namespace SunnysideStablesAPI.Utility
             var heightInches = (Int32.Parse(parts[0]) * 4) + Int32.Parse(parts[1]);
             return heightInches * 2.54;
         }
+
+        public static long GetTimestamp( this DateTime date)
+        {
+            return new DateTimeOffset(date.Year,
+                                      date.Month,
+                                      date.Day,
+                                      date.Hour,
+                                      date.Minute,
+                                      date.Second,
+                                      TimeSpan.Zero).ToUnixTimeSeconds();
+        }
+        
     }
 }

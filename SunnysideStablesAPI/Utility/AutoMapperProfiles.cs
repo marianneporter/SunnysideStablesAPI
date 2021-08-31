@@ -16,8 +16,8 @@ namespace SunnysideStablesAPI.Utility
                 .ReverseMap();
 
             CreateMap<HorseAddUpdateDto, Horse>()
-                .ForMember(dest => dest.Heightcm, opt => opt.MapFrom(src => Utility.HandsToCm(src.HeightHands)));
-
+                .ForMember(dest => dest.Heightcm, opt => opt.MapFrom(src => Utility.HandsToCm(src.HeightHands)))
+                .ForMember(dest => dest.ImageUrl, opt => opt.Ignore());
 
             CreateMap<Owner, OwnerDto>();
         }

@@ -1,18 +1,14 @@
 ﻿using AutoMapper;
-using Azure.Storage.Blobs;
-using Azure.Storage.Blobs.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Processing;
 using SunnysideStablesAPI.Data.Repository;
 using SunnysideStablesAPI.Dtos;
 using SunnysideStablesAPI.Models;
+using SunnysideStablesAPI.UtilityServices.PhotoBlobs;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -26,14 +22,17 @@ namespace SunnysideStablesAPI.Controllers
         private readonly IStablesRepo _repo;
         private readonly IMapper _mapper;
         private readonly IConfiguration _config;
+        private readonly IPhotoBlobService _photoService;
 
         public HorsesController(IStablesRepo repo,
                                 IMapper mapper,
-                                IConfiguration config)
+                                IConfiguration config,
+                                IPhotoBlobService photoService)
         {
             _repo = repo;
             _mapper = mapper;
             _config = config;
+            _photoService = photoService;
         }
 
         [HttpGet]
@@ -66,8 +65,7 @@ namespace SunnysideStablesAPI.Controllers
             return Ok(horseCount);        
          
         }
-
-
+   
         [HttpPost]
         public async Task<IActionResult> AddHorse([FromForm] HorseAddUpdateDto horseAddUpdateDto)
         {
@@ -97,7 +95,7 @@ namespace SunnysideStablesAPI.Controllers
 
             if (horseAddUpdateDto.ImageFile != null)
             {
-                var photoUrl = await SavePhoto(horseAddUpdateDto.ImageFile, horseToAdd.Id, horseToAdd.Name);
+                var photoUrl = await SavePhoto(null, horseAddUpdateDto.ImageFile, horseToAdd.ModifiedDate, horseToAdd.Name);
 
                 if (!String.IsNullOrEmpty(photoUrl)) // photo saved successfully
                 {
@@ -111,7 +109,6 @@ namespace SunnysideStablesAPI.Controllers
 
         }
 
-        [AllowAnonymous]
         [HttpPatch]
         public async Task<IActionResult> UpdateHorse([FromForm] HorseAddUpdateDto horseAddUpdateDto)
         {
@@ -124,6 +121,18 @@ namespace SunnysideStablesAPI.Controllers
             horseToUpdate = _mapper.Map<HorseAddUpdateDto, Horse>(horseAddUpdateDto, horseToUpdate);
             horseToUpdate.ModifiedDate = DateTime.Now;
 
+            if (horseAddUpdateDto.ImageFile != null)
+            {
+                var photoUrl = await SavePhoto(horseToUpdate.ImageUrl, horseAddUpdateDto.ImageFile, horseToUpdate.ModifiedDate, horseToUpdate.Name);
+
+                if (!String.IsNullOrEmpty(photoUrl)) // old  photo deleted and new one saved successfully
+                {
+                    horseToUpdate.ImageUrl = photoUrl;
+                }
+            }
+
+            horseToUpdate.ModifiedDate = DateTime.Now;
+ 
             var updateSuccess =await _repo.Commit();
 
             if (!updateSuccess)
@@ -135,36 +144,17 @@ namespace SunnysideStablesAPI.Controllers
 
             return updateSuccess ? NoContent() : StatusCode(500);
 
-
         }
 
-        private async Task<string> SavePhoto(IFormFile uploadedPhoto, int id, string horseName)
-        {
+        private async Task<string> SavePhoto(string oldImageUrl, IFormFile uploadedPhoto, DateTime modifiedDate, string horseName)  {
 
-            var filename = horseName.Replace(" ", String.Empty).ToLower() + '_' + id.ToString() + ".jpg";
-
-            var azureConnectionString = _config.GetConnectionString("AzureStorageConnection");
-            var azureContainer = _config.GetValue<string>("StorageContainer");
-
-            var container = new BlobContainerClient(azureConnectionString, azureContainer);
-            var blob = container.GetBlobClient(filename);
-            await blob.DeleteIfExistsAsync(DeleteSnapshotsOption.IncludeSnapshots);
-
-            using (var stream = uploadedPhoto.OpenReadStream())
+            if (oldImageUrl != null)
             {
-                using (var output = new MemoryStream())
-                using (Image image = Image.Load(stream))
-                {
-                    image.Mutate(x => x.Resize(600, 450));
-                    image.SaveAsJpeg(output);
-                    output.Position = 0;
-                    await blob.UploadAsync(output, new BlobHttpHeaders { ContentType = "image/jpeg" });
-                }
+                await this._photoService.RemovePhotoBlob(oldImageUrl);
             }
 
-
-            var blobUrl = blob.Uri.AbsoluteUri;
-
+            var blobUrl = await this._photoService.AddPhotoBlob(uploadedPhoto, horseName, modifiedDate);
+ 
             return blobUrl;
         }
 
