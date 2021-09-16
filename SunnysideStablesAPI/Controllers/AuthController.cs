@@ -35,6 +35,7 @@ namespace SunnysideStablesAPI.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
+           
             var user = await _userManager.FindByEmailAsync(loginDto.Email);
 
             if (user == null)

@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SunnysideStablesAPI.Models;
-using System;
+
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -15,15 +15,25 @@ namespace SunnysideStablesAPI.Data.Repository
         {
             _context = context;
         }
-        public async Task<List<Horse>> GetHorses(bool includeOwners=true, int pageIndex=0, int pageSize=3)
+        public async Task<List<Horse>> GetHorses(bool includeOwners=true,
+                                                  int pageIndex=0,
+                                                  int pageSize=3,
+                                                  string searchParam = null)
         {
-            var horses= await _context.Horse
-                          .Include(o => o.HorseOwner)
-                          .ThenInclude(o => o.Owner)
-                          .OrderBy(h => h.Name)
-                          .Skip(pageIndex * pageSize)
-                          .Take(pageSize).ToListAsync();
-            return horses;
+            IQueryable<Horse> query = _context.Horse;
+
+            if (searchParam != null)
+            {
+                query = query.Where(h => h.Name.StartsWith(searchParam));
+            }
+
+            return await query
+                        .Include(o => o.HorseOwner)
+                        .ThenInclude(o => o.Owner)
+                        .OrderBy(h => h.Name)
+                        .Skip(pageIndex * pageSize)
+                        .Take(pageSize).ToListAsync();
+           
         }
 
         public async Task<int> GetHorseCount()
@@ -55,7 +65,6 @@ namespace SunnysideStablesAPI.Data.Repository
 
         public async Task<Horse> GetHorseById(int id)
         {
-
             return await _context.Horse
                           .Include(o => o.HorseOwner)
                           .ThenInclude(o => o.Owner)

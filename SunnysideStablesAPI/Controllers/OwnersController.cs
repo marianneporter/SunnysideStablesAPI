@@ -33,7 +33,6 @@ namespace SunnysideStablesAPI.Controllers
             _config = config;
         }
 
-        [AllowAnonymous]
         [HttpGet]
         public async Task<IActionResult> GetOwners()
         {
@@ -43,7 +42,6 @@ namespace SunnysideStablesAPI.Controllers
 
         }
 
-        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> AddOwner(OwnerDto ownerDto)
         {

@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
 using SunnysideStablesAPI.Data.Repository;
 using SunnysideStablesAPI.Dtos;
 using SunnysideStablesAPI.Models;
@@ -21,30 +20,27 @@ namespace SunnysideStablesAPI.Controllers
     {
         private readonly IStablesRepo _repo;
         private readonly IMapper _mapper;
-        private readonly IConfiguration _config;
         private readonly IPhotoBlobService _photoService;
 
         public HorsesController(IStablesRepo repo,
                                 IMapper mapper,
-                                IConfiguration config,
                                 IPhotoBlobService photoService)
         {
             _repo = repo;
             _mapper = mapper;
-            _config = config;
             _photoService = photoService;
         }
 
+        [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetHorses(int pageIndex=0, int pageSize=3)
+        public async Task<IActionResult> GetHorses(int pageIndex=0, int pageSize=3, string searchParam=null)
         {
-            var horses = await _repo.GetHorses(true, pageIndex, pageSize);
+            var horses = await _repo.GetHorses(true, pageIndex, pageSize, searchParam);
           
             return Ok(_mapper.Map<List<HorseDto>>(horses));
           
         }
 
-        [AllowAnonymous]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetHorseById(int id)
         {
@@ -53,9 +49,6 @@ namespace SunnysideStablesAPI.Controllers
             return Ok(_mapper.Map<HorseDto>(horse));
 
         }
-
-
-
 
         [HttpGet("count")]
         public async Task<IActionResult> GetHorseCount()
