@@ -33,12 +33,14 @@ namespace SunnysideStablesAPI.Controllers
 
         [AllowAnonymous]
         [HttpGet]
-        public async Task<IActionResult> GetHorses(int pageIndex=0, int pageSize=3, string searchParam=null)
+        public async Task<IActionResult> GetHorses(int pageIndex=0, int pageSize=3, string search="")
         {
-            var horses = await _repo.GetHorses(true, pageIndex, pageSize, searchParam);
-          
-            return Ok(_mapper.Map<List<HorseDto>>(horses));
-          
+            var horseCount = await _repo.GetHorseCount();
+
+            var horses = await _repo.GetHorses(true, pageIndex, pageSize, search);
+
+            return Ok ( new { count = horseCount, horses =_mapper.Map<List<HorseDto>>(horses) });
+            
         }
 
         [HttpGet("{id}")]

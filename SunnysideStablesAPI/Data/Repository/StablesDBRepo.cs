@@ -1,6 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using SunnysideStablesAPI.Models;
-
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,13 +18,13 @@ namespace SunnysideStablesAPI.Data.Repository
         public async Task<List<Horse>> GetHorses(bool includeOwners=true,
                                                   int pageIndex=0,
                                                   int pageSize=3,
-                                                  string searchParam = null)
+                                                  string search = "")
         {
             IQueryable<Horse> query = _context.Horse;
 
-            if (searchParam != null)
+            if (!String.IsNullOrEmpty(search))
             {
-                query = query.Where(h => h.Name.StartsWith(searchParam));
+                query = query.Where(h => h.Name.ToLower().StartsWith(search));
             }
 
             return await query
@@ -33,7 +33,7 @@ namespace SunnysideStablesAPI.Data.Repository
                         .OrderBy(h => h.Name)
                         .Skip(pageIndex * pageSize)
                         .Take(pageSize).ToListAsync();
-           
+  
         }
 
         public async Task<int> GetHorseCount()
