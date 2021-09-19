@@ -35,11 +35,10 @@ namespace SunnysideStablesAPI.Controllers
         [HttpGet]
         public async Task<IActionResult> GetHorses(int pageIndex=0, int pageSize=3, string search="")
         {
-            var horseCount = await _repo.GetHorseCount();
+  
+            HorseListData horseData = await _repo.GetHorses(true, pageIndex, pageSize, search);
 
-            var horses = await _repo.GetHorses(true, pageIndex, pageSize, search);
-
-            return Ok ( new { count = horseCount, horses =_mapper.Map<List<HorseDto>>(horses) });
+            return Ok ( new { count = horseData.ListCount, horses =_mapper.Map<List<HorseDto>>(horseData.Horses) });
             
         }
 

@@ -15,10 +15,10 @@ namespace SunnysideStablesAPI.Data.Repository
         {
             _context = context;
         }
-        public async Task<List<Horse>> GetHorses(bool includeOwners=true,
-                                                  int pageIndex=0,
-                                                  int pageSize=3,
-                                                  string search = "")
+        public async Task<HorseListData> GetHorses(bool includeOwners=true,
+                                                   int pageIndex=0,
+                                                   int pageSize=3,
+                                                   string search = "")                                              
         {
             IQueryable<Horse> query = _context.Horse;
 
@@ -27,13 +27,20 @@ namespace SunnysideStablesAPI.Data.Repository
                 query = query.Where(h => h.Name.ToLower().StartsWith(search));
             }
 
-            return await query
+            var queryCount = query.Count();
+
+            var horses = await query
                         .Include(o => o.HorseOwner)
                         .ThenInclude(o => o.Owner)
                         .OrderBy(h => h.Name)
                         .Skip(pageIndex * pageSize)
                         .Take(pageSize).ToListAsync();
-  
+
+            return new HorseListData
+            {
+                ListCount = queryCount,
+                Horses = horses
+            };
         }
 
         public async Task<int> GetHorseCount()

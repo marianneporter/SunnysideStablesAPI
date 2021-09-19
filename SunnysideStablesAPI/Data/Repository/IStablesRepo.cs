@@ -6,7 +6,7 @@ namespace SunnysideStablesAPI.Data.Repository
 {
     public interface IStablesRepo
     {
-        Task<List<Horse>> GetHorses(bool includeOwners=false,
+        Task<HorseListData> GetHorses(bool includeOwners=false,
                                     int pageIndex=0,
                                     int pageSize=3,
                                     string searchParam=null);
