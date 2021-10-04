@@ -38,17 +38,17 @@ namespace SunnysideStablesAPI.UtilityServices.PhotoBlobs
         {
             var newFilename = horseName.Replace(" ", String.Empty).ToLower() + "_" + modifiedDate.GetTimestamp().ToString() + ".jpg";
             BlobClient blob = Container.GetBlobClient(newFilename);   //blob client for new filename
-
+            
             using (var stream = uploadedPhoto.OpenReadStream())
             {
                 using (var output = new MemoryStream())
-                using (Image image = Image.Load(stream))
-                {
-                    image.Mutate(x => x.Resize(600, 450));
-                    image.SaveAsJpeg(output);
-                    output.Position = 0;
-                    await blob.UploadAsync(output, new BlobHttpHeaders { ContentType = "image/jpeg" });
-                }
+                    using (Image image = Image.Load(stream))
+                    {
+                        image.Mutate(x => x.Resize(600, 450));
+                        image.SaveAsJpeg(output);
+                        output.Position = 0;
+                        await blob.UploadAsync(output, new BlobHttpHeaders { ContentType = "image/jpeg" });
+                    }
             }
 
             return blob.Uri.AbsoluteUri;

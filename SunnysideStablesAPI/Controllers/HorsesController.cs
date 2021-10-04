@@ -83,23 +83,32 @@ namespace SunnysideStablesAPI.Controllers
                                     OwnerId = o
                                 }).ToList();
 
-            _repo.AddHorseOwners(horseOwners);            
+            _repo.AddHorseOwners(horseOwners);
 
             // image to blob storage
 
+            var photoUploaded = false;
             if (horseAddUpdateDto.ImageFile != null)
             {
-                var photoUrl = await SavePhoto(null, horseAddUpdateDto.ImageFile, horseToAdd.ModifiedDate, horseToAdd.Name);
-
-                if (!String.IsNullOrEmpty(photoUrl)) // photo saved successfully
+                try
                 {
-                    horseToAdd.ImageUrl = photoUrl;
+                    var photoUrl = await SavePhoto(null, horseAddUpdateDto.ImageFile, horseToAdd.ModifiedDate, horseToAdd.Name);
+
+                    if (!String.IsNullOrEmpty(photoUrl)) // photo saved successfully
+                    {
+                        horseToAdd.ImageUrl = photoUrl;
+                        photoUploaded = true;
+                    }
                 }
+                catch
+                {
+                    photoUploaded = false;
+                } 
             }
 
             await _repo.Commit();
 
-            return Created("~api/horses", new { id = horseToAdd.Id, name = horseToAdd.Name });
+            return Created("~api/horses", new { id = horseToAdd.Id, name = horseToAdd.Name, photoUploaded = photoUploaded });
 
         }
 
@@ -113,16 +122,25 @@ namespace SunnysideStablesAPI.Controllers
             }
 
             horseToUpdate = _mapper.Map<HorseAddUpdateDto, Horse>(horseAddUpdateDto, horseToUpdate);
-            horseToUpdate.ModifiedDate = DateTime.Now;
 
+            var photoUploaded = false;
             if (horseAddUpdateDto.ImageFile != null)
             {
-                var photoUrl = await SavePhoto(horseToUpdate.ImageUrl, horseAddUpdateDto.ImageFile, horseToUpdate.ModifiedDate, horseToUpdate.Name);
-
-                if (!String.IsNullOrEmpty(photoUrl)) // old  photo deleted and new one saved successfully
+                try
                 {
-                    horseToUpdate.ImageUrl = photoUrl;
+                    var photoUrl = await SavePhoto(horseToUpdate.ImageUrl, horseAddUpdateDto.ImageFile, horseToUpdate.ModifiedDate, horseToUpdate.Name);
+
+                    if (!String.IsNullOrEmpty(photoUrl)) // old  photo deleted and new one saved successfully
+                    {
+                        horseToUpdate.ImageUrl = photoUrl;
+                    }
+                    photoUploaded = true;
                 }
+                catch
+                {
+                    photoUploaded = false;
+                }
+ 
             }
 
             horseToUpdate.ModifiedDate = DateTime.Now;
@@ -135,20 +153,21 @@ namespace SunnysideStablesAPI.Controllers
             }
 
             updateSuccess = await CheckAndUpdateOwners(horseToUpdate, horseAddUpdateDto.OwnerIds.ToArray());
-
-            return updateSuccess ? NoContent() : StatusCode(500);
+  
+            return updateSuccess ? Ok( new { photoUploaded } ) : StatusCode(500);
 
         }
 
-        private async Task<string> SavePhoto(string oldImageUrl, IFormFile uploadedPhoto, DateTime modifiedDate, string horseName)  {
+        private async Task<string> SavePhoto(string oldImageUrl, IFormFile uploadedPhoto, DateTime modifiedDate, string horseName)  { 
 
+            var blobUrl = await this._photoService.AddPhotoBlob(uploadedPhoto, horseName, modifiedDate);
+
+            
             if (oldImageUrl != null)
             {
                 await this._photoService.RemovePhotoBlob(oldImageUrl);
             }
 
-            var blobUrl = await this._photoService.AddPhotoBlob(uploadedPhoto, horseName, modifiedDate);
- 
             return blobUrl;
         }
 
