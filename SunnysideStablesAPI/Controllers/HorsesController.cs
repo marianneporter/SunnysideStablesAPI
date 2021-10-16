@@ -42,6 +42,7 @@ namespace SunnysideStablesAPI.Controllers
             
         }
 
+
         [HttpGet("{id}")]
         public async Task<IActionResult> GetHorseById(int id)
         {

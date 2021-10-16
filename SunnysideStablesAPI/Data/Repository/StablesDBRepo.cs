@@ -87,6 +87,5 @@ namespace SunnysideStablesAPI.Data.Repository
         {
             _context.Remove(horseOwner);
         }
-
     }
 }

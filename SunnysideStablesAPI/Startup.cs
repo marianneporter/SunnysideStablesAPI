@@ -59,7 +59,7 @@ namespace SunnysideStablesAPI
                 {
                     OnTokenValidated = context =>
                     {
-                        //TODO
+                     
                         return Task.CompletedTask;
                     }
                 };
@@ -109,9 +109,13 @@ namespace SunnysideStablesAPI
             app.UseAuthentication();
             app.UseAuthorization();
 
+            app.UseDefaultFiles();
+            app.UseStaticFiles();
+
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapFallbackToController("Index", "Fallback");
             });
         }
     }

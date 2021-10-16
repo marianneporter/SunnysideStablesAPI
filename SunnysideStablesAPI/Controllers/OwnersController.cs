@@ -45,6 +45,14 @@ namespace SunnysideStablesAPI.Controllers
         [HttpPost]
         public async Task<IActionResult> AddOwner(OwnerDto ownerDto)
         {
+           
+            var user = await _userManager.FindByEmailAsync(ownerDto.Email);
+
+            if (user != null)
+            {
+                return Conflict( "There is already an owner with this email" );
+            }
+
             var owner = new Owner()
             {
                 Email = ownerDto.Email,
