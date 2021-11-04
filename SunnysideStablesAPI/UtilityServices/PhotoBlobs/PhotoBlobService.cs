@@ -41,9 +41,12 @@ namespace SunnysideStablesAPI.UtilityServices.PhotoBlobs
             
             using (var stream = uploadedPhoto.OpenReadStream())
             {
+
+
                 using (var output = new MemoryStream())
                     using (Image image = Image.Load(stream))
                     {
+                        
                         image.Mutate(x => x.Resize(600, 450));
                         image.SaveAsJpeg(output);
                         output.Position = 0;

@@ -8,6 +8,7 @@ using SunnysideStablesAPI.Models;
 using SunnysideStablesAPI.UtilityServices.PhotoBlobs;
 using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -91,22 +92,14 @@ namespace SunnysideStablesAPI.Controllers
             var photoUploaded = false;
             if (horseAddUpdateDto.ImageFile != null)
             {
-                try
+                var photoUrl = await SavePhoto(null, horseAddUpdateDto.ImageFile, horseToAdd.ModifiedDate, horseToAdd.Name);
+                if (photoUrl != null)
                 {
-                    var photoUrl = await SavePhoto(null, horseAddUpdateDto.ImageFile, horseToAdd.ModifiedDate, horseToAdd.Name);
-
-                    if (!String.IsNullOrEmpty(photoUrl)) // photo saved successfully
-                    {
-                        horseToAdd.ImageUrl = photoUrl;
-                        photoUploaded = true;
-                    }
-                }
-                catch
-                {
-                    photoUploaded = false;
-                } 
+                    photoUploaded = true;
+                    horseToAdd.ImageUrl = photoUrl;
+                }              
             }
-
+ 
             await _repo.Commit();
 
             return Created("~api/horses", new { id = horseToAdd.Id, name = horseToAdd.Name, photoUploaded = photoUploaded });
@@ -127,22 +120,13 @@ namespace SunnysideStablesAPI.Controllers
             var photoUploaded = false;
             if (horseAddUpdateDto.ImageFile != null)
             {
-                try
+                var photoUrl = await SavePhoto(horseToUpdate.ImageUrl, horseAddUpdateDto.ImageFile, horseToUpdate.ModifiedDate, horseToUpdate.Name);
+                if (photoUrl != null)
                 {
-                    var photoUrl = await SavePhoto(horseToUpdate.ImageUrl, horseAddUpdateDto.ImageFile, horseToUpdate.ModifiedDate, horseToUpdate.Name);
-
-                    if (!String.IsNullOrEmpty(photoUrl)) // old  photo deleted and new one saved successfully
-                    {
-                        horseToUpdate.ImageUrl = photoUrl;
-                    }
                     photoUploaded = true;
+                    horseToUpdate.ImageUrl = photoUrl;
                 }
-                catch
-                {
-                    photoUploaded = false;
-                }
- 
-            }
+            } 
 
             horseToUpdate.ModifiedDate = DateTime.Now;
  
@@ -158,19 +142,48 @@ namespace SunnysideStablesAPI.Controllers
             return updateSuccess ? Ok( new { photoUploaded } ) : StatusCode(500);
 
         }
-
-        private async Task<string> SavePhoto(string oldImageUrl, IFormFile uploadedPhoto, DateTime modifiedDate, string horseName)  { 
-
-            var blobUrl = await this._photoService.AddPhotoBlob(uploadedPhoto, horseName, modifiedDate);
-
-            
-            if (oldImageUrl != null)
+         
+        private async Task<string> SavePhoto(string oldImageUrl, IFormFile uploadedPhoto, DateTime modifiedDate, string horseName)
+        {
+            string blobUrl = null;
+            bool formatError = false;
+            try
             {
-                await this._photoService.RemovePhotoBlob(oldImageUrl);
+                using (var image = Image.FromStream(uploadedPhoto.OpenReadStream()))
+                {
+                    // checks and flags error if photo is not in landscape mode
+                    if (image.PropertyIdList.Contains(0x0112))
+                    {
+                        int rotationValue = image.GetPropertyItem(0x0112).Value[0];
+                        if (rotationValue != 1)
+                        {
+                            formatError = true;
+                        }
+                    }  
+                }
+
+                if (!formatError)
+                {
+                    blobUrl = await this._photoService.AddPhotoBlob(uploadedPhoto, horseName, modifiedDate);
+
+                    if (!String.IsNullOrEmpty(blobUrl)) // photo saved successfully
+                    {
+                        if (oldImageUrl != null)
+                        {
+                            await this._photoService.RemovePhotoBlob(oldImageUrl);
+                        }
+                    }
+                } 
+ 
+            }
+            catch
+            {
+                blobUrl = null;
             }
 
             return blobUrl;
         }
+
 
         private async Task<bool> CheckAndUpdateOwners(Horse horseToUpdate, int[] ownerIds)
         {
