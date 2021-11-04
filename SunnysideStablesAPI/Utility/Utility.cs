@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 
 namespace SunnysideStablesAPI.Utility
 {
@@ -21,6 +22,11 @@ namespace SunnysideStablesAPI.Utility
                                       date.Second,
                                       TimeSpan.Zero).ToUnixTimeSeconds();
         }
-        
+
+        public static string ToTitleCase(this string input)
+        {
+            return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input.ToLower());
+        }
+
     }
 }
