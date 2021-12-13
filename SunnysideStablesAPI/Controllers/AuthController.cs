@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 using SunnysideStablesAPI.Dtos;
+using SunnysideStablesAPI.Models;
 using SunnysideStablesAPI.Models.Identity;
 using System;
 using System.Collections.Generic;
@@ -15,7 +16,6 @@ using System.Threading.Tasks;
 namespace SunnysideStablesAPI.Controllers
 {
     [Route("api/[controller]")]
-    [AllowAnonymous]
     [ApiController]
     public class AuthController : ControllerBase
     {
@@ -32,6 +32,7 @@ namespace SunnysideStablesAPI.Controllers
             _config = config;
         }
 
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginDto loginDto)
         {
@@ -62,6 +63,67 @@ namespace SunnysideStablesAPI.Controllers
 
             return Unauthorized();          
 
+        }
+
+        [Authorize(Roles = "Manager")]
+        [HttpPost("register")]
+        public async Task<IActionResult> Register(RegisterDto registerDto)
+        {
+
+            var user = await _userManager.FindByEmailAsync(registerDto.Email);
+
+            if (user != null)
+            {
+                return Conflict("There is already an account with this email");
+            }
+
+            IdentityResult result;        
+
+            if (registerDto.Role == "Admin")
+            {
+                var adminUser = new Staff()
+                {
+                    Email = registerDto.Email,
+                    UserName = registerDto.Email,
+                    FirstName = registerDto.FirstName,
+                    LastName = registerDto.LastName,
+                    JobTitle = registerDto.JobTitle
+                };               
+
+                result = _userManager.CreateAsync(adminUser, registerDto.Password).Result;
+
+                if (result != IdentityResult.Success)
+                {
+                    return BadRequest("User could not be created");
+                }
+
+                var addedUser = _userManager.FindByEmailAsync(adminUser.Email).Result;
+
+                _userManager.AddToRolesAsync(addedUser, new string[] { "Admin" }).Wait();
+            } else
+            {
+                // To do...  create new owner user
+                var ownerUser = new Owner()
+                {
+                    Email = registerDto.Email,
+                    UserName = registerDto.Email,
+                    FirstName = registerDto.FirstName,
+                    LastName = registerDto.LastName
+                };
+
+                result = _userManager.CreateAsync(ownerUser, registerDto.Password).Result;
+
+                if (result != IdentityResult.Success)
+                {
+                    return BadRequest("User could not be created");
+                }
+
+                var addedUser = _userManager.FindByEmailAsync(ownerUser.Email).Result;
+
+                _userManager.AddToRolesAsync(ownerUser, new string[] { "Client" }).Wait();
+            }
+
+            return Ok("User Registered");
         }
 
         private async Task<string> GenerateJwtToken(User user)
