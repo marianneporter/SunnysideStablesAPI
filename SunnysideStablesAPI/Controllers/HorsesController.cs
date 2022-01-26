@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using SunnysideStablesAPI.Data.Repository;
 using SunnysideStablesAPI.Dtos;
 using SunnysideStablesAPI.Models;
+
 using SunnysideStablesAPI.UtilityServices.PhotoBlobs;
 using System;
 using System.Collections.Generic;
@@ -67,7 +68,19 @@ namespace SunnysideStablesAPI.Controllers
         {
             Horse horseToAdd = _mapper.Map<Horse>(horseAddUpdateDto);
 
+            var userIdFromClaims = User.Claims.FirstOrDefault().Value;
+
+            if (Int32.TryParse(userIdFromClaims, out int currentUser))
+            {
+                horseToAdd.ModifiedBy = currentUser;
+            }
+            else
+            {
+                horseToAdd.ModifiedBy = 0;
+            }            
+
             _repo.Add(horseToAdd);
+
 
             var addSuccess = await  _repo.Commit();
 
@@ -82,7 +95,7 @@ namespace SunnysideStablesAPI.Controllers
                                 new HorseOwner
                                 {
                                     HorseId = horseToAdd.Id,
-                                    OwnerId = o
+                                    OwnerId = o                                   
                                 }).ToList();
 
             _repo.AddHorseOwners(horseOwners);
@@ -129,7 +142,18 @@ namespace SunnysideStablesAPI.Controllers
             } 
 
             horseToUpdate.ModifiedDate = DateTime.Now;
- 
+
+            var userIdFromClaims = User.Claims.FirstOrDefault().Value;
+
+            if (Int32.TryParse(userIdFromClaims, out int currentUser))
+            {
+                horseToUpdate.ModifiedBy = currentUser;
+            }
+            else
+            {
+                horseToUpdate.ModifiedBy = 0;
+            }
+
             var updateSuccess =await _repo.Commit();
 
             if (!updateSuccess)
@@ -221,5 +245,7 @@ namespace SunnysideStablesAPI.Controllers
 
             return true;
         } 
+
+       
     }
 }

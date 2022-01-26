@@ -7,7 +7,9 @@ using SunnysideStablesAPI.Data.Repository;
 using SunnysideStablesAPI.Dtos;
 using SunnysideStablesAPI.Models;
 using SunnysideStablesAPI.Models.Identity;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace SunnysideStablesAPI.Controllers
@@ -58,8 +60,19 @@ namespace SunnysideStablesAPI.Controllers
                 Email = ownerDto.Email,
                 UserName = ownerDto.Email,
                 FirstName = ownerDto.FirstName,
-                LastName = ownerDto.LastName
+                LastName = ownerDto.LastName,                
             };
+
+            var userIdFromClaims = User.Claims.FirstOrDefault().Value;
+
+            if (Int32.TryParse(userIdFromClaims, out int currentUser))
+            {
+                owner.ModifiedBy = currentUser;
+            }
+            else
+            {
+                owner.ModifiedBy = 0;
+            }
 
             var result = await _userManager.CreateAsync(owner, _config["InitialOwnerPassword"]);
 

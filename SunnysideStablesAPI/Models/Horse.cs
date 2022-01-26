@@ -22,6 +22,7 @@ namespace SunnysideStablesAPI.Models
         public ICollection<HorseOwner> HorseOwner { get; set; }
         public DateTime CreatedDate { get; set; }
         public DateTime ModifiedDate { get; set; }
+        public int ModifiedBy { get; set; }
 
         [NotMapped]
         public string HeightHands
