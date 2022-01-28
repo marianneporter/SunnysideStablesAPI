@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Processing;
-using SunnysideStablesAPI.Utility;
+using SunnysideStablesAPI.Shared;
 using System;
 using System.IO;
 using System.Threading.Tasks;

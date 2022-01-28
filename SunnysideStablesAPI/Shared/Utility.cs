@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Globalization;
 
-namespace SunnysideStablesAPI.Utility
+namespace SunnysideStablesAPI.Shared
 {
     public static class Utility
     {
@@ -26,6 +26,18 @@ namespace SunnysideStablesAPI.Utility
         public static string ToTitleCase(this string input)
         {
             return CultureInfo.CurrentCulture.TextInfo.ToTitleCase(input.ToLower());
+        }
+
+        public static int GetCurrentUser(string userFromClaim)
+        {
+            if (Int32.TryParse(userFromClaim, out int currentUser)) 
+            {
+                return currentUser;
+            }
+            else
+            {
+                return 0;
+            }
         }
 
     }

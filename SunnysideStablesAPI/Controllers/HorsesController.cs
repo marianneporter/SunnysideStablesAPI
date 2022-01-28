@@ -12,7 +12,7 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
 using System.Threading.Tasks;
-
+using SunnysideStablesAPI.Shared;
 namespace SunnysideStablesAPI.Controllers
 {
     [Route("api/[controller]")]
@@ -68,19 +68,9 @@ namespace SunnysideStablesAPI.Controllers
         {
             Horse horseToAdd = _mapper.Map<Horse>(horseAddUpdateDto);
 
-            var userIdFromClaims = User.Claims.FirstOrDefault().Value;
-
-            if (Int32.TryParse(userIdFromClaims, out int currentUser))
-            {
-                horseToAdd.ModifiedBy = currentUser;
-            }
-            else
-            {
-                horseToAdd.ModifiedBy = 0;
-            }            
+            horseToAdd.ModifiedBy = Utility.GetCurrentUser(User.Claims.FirstOrDefault().Value);
 
             _repo.Add(horseToAdd);
-
 
             var addSuccess = await  _repo.Commit();
 
@@ -143,16 +133,7 @@ namespace SunnysideStablesAPI.Controllers
 
             horseToUpdate.ModifiedDate = DateTime.Now;
 
-            var userIdFromClaims = User.Claims.FirstOrDefault().Value;
-
-            if (Int32.TryParse(userIdFromClaims, out int currentUser))
-            {
-                horseToUpdate.ModifiedBy = currentUser;
-            }
-            else
-            {
-                horseToUpdate.ModifiedBy = 0;
-            }
+            horseToUpdate.ModifiedBy = Utility.GetCurrentUser(User.Claims.FirstOrDefault().Value); 
 
             var updateSuccess =await _repo.Commit();
 

@@ -4,7 +4,7 @@ using SunnysideStablesAPI.Models;
 using System.Linq;
 
 
-namespace SunnysideStablesAPI.Utility
+namespace SunnysideStablesAPI.Shared
 {
     public class AutoMapperProfiles : Profile
     {
