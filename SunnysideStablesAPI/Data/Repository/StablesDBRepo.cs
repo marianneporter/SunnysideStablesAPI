@@ -22,12 +22,14 @@ namespace SunnysideStablesAPI.Data.Repository
         {
             IQueryable<Horse> query = _context.Horse;
 
+            var totalHorses = query.Count();
+
             if (!String.IsNullOrEmpty(search))
             {
                 query = query.Where(h => h.Name.ToLower().StartsWith(search));
             }
 
-            var queryCount = query.Count();
+            var searchCount = query.Count();
 
             var horses = await query
                         .Include(o => o.HorseOwner)
@@ -38,7 +40,8 @@ namespace SunnysideStablesAPI.Data.Repository
 
             return new HorseListData
             {
-                ListCount = queryCount,
+                CountAll = totalHorses,
+                SearchCount = searchCount,
                 Horses = horses
             };
         }

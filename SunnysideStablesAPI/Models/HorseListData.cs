@@ -4,7 +4,8 @@ namespace SunnysideStablesAPI.Models
 {
     public class HorseListData
     {
-        public int ListCount { get; set; }
+        public int CountAll { get; set; }
+        public int SearchCount { get; set; }
         public List<Horse> Horses { get; set; }   
     }
 }

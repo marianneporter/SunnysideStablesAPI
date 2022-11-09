@@ -10,8 +10,8 @@ using SunnysideStablesAPI.Data;
 namespace SunnysideStablesAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20220127094405_tracking")]
-    partial class tracking
+    [Migration("20221018132710_create-database")]
+    partial class createdatabase
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

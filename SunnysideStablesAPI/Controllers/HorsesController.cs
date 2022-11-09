@@ -33,14 +33,16 @@ namespace SunnysideStablesAPI.Controllers
             _photoService = photoService;
         }
 
-        [AllowAnonymous]
+       
         [HttpGet]
         public async Task<IActionResult> GetHorses(int pageIndex=0, int pageSize=3, string search="")
         {
   
             HorseListData horseData = await _repo.GetHorses(true, pageIndex, pageSize, search);
 
-            return Ok ( new { count = horseData.ListCount, horses =_mapper.Map<List<HorseDto>>(horseData.Horses) });
+            return Ok ( new { countAll = horseData.CountAll,
+                              searchCount = horseData.SearchCount,
+                              horses =_mapper.Map<List<HorseDto>>(horseData.Horses) });
             
         }
 
@@ -181,7 +183,7 @@ namespace SunnysideStablesAPI.Controllers
                 } 
  
             }
-            catch
+            catch (Exception e)
             {
                 blobUrl = null;
             }

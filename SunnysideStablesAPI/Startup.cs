@@ -34,6 +34,7 @@ namespace SunnysideStablesAPI
 
             services.AddDbContextPool<AppDbContext>(options =>
             {
+                var test = Configuration.GetConnectionString("DefaultConnection");
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
             });
             services.AddScoped<IStablesRepo, StablesDBRepo>()
@@ -101,10 +102,12 @@ namespace SunnysideStablesAPI
 
             app.UseRouting();
 
-            if (env.IsDevelopment())
-            {
-                app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-            }
+            //if (env.IsDevelopment())
+            //{
+            //    app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+            //}
+
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
 
             app.UseAuthentication();
             app.UseAuthorization();
