@@ -13,14 +13,8 @@ namespace SunnysideStablesAPI.Shared
         }
 
         public static long GetTimestamp( this DateTime date)
-        {
-            return new DateTimeOffset(date.Year,
-                                      date.Month,
-                                      date.Day,
-                                      date.Hour,
-                                      date.Minute,
-                                      date.Second,
-                                      TimeSpan.Zero).ToUnixTimeSeconds();
+        { 
+            return new DateTimeOffset(date).ToUnixTimeMilliseconds();           
         }
 
         public static string ToTitleCase(this string input)

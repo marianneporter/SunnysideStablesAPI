@@ -122,6 +122,10 @@ namespace SunnysideStablesAPI.Controllers
 
             horseToUpdate = _mapper.Map<HorseAddUpdateDto, Horse>(horseAddUpdateDto, horseToUpdate);
 
+            horseToUpdate.ModifiedDate = DateTime.Now;
+
+            horseToUpdate.ModifiedBy = Utility.GetCurrentUser(User.Claims.FirstOrDefault().Value);
+
             var photoUploaded = false;
             if (horseAddUpdateDto.ImageFile != null)
             {
@@ -132,10 +136,6 @@ namespace SunnysideStablesAPI.Controllers
                     horseToUpdate.ImageUrl = photoUrl;
                 }
             } 
-
-            horseToUpdate.ModifiedDate = DateTime.Now;
-
-            horseToUpdate.ModifiedBy = Utility.GetCurrentUser(User.Claims.FirstOrDefault().Value); 
 
             var updateSuccess =await _repo.Commit();
 
