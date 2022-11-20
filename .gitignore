@@ -362,3 +362,6 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 /SunnysideStablesAPI/Properties/ServiceDependencies/sunnystables - Web Deploy
+/SunnysideStablesAPI/appsettings.json
+/SunnysideStablesAPI/appsettings.development.json
+

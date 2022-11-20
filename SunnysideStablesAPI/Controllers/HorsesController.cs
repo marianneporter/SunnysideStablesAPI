@@ -52,6 +52,11 @@ namespace SunnysideStablesAPI.Controllers
         {
             var horse = await _repo.GetHorseById(id);
 
+            if (horse == null)
+            {
+                return NotFound();
+            } 
+
             return Ok(_mapper.Map<HorseDto>(horse));
 
         }
@@ -153,36 +158,20 @@ namespace SunnysideStablesAPI.Controllers
         private async Task<string> SavePhoto(string oldImageUrl, IFormFile uploadedPhoto, DateTime modifiedDate, string horseName)
         {
             string blobUrl = null;
-            bool formatError = false;
+          
             try
             {
-                using (var image = Image.FromStream(uploadedPhoto.OpenReadStream()))
-                {
-                    // checks and flags error if photo is not in landscape mode
-                    if (image.PropertyIdList.Contains(0x0112))
-                    {
-                        int rotationValue = image.GetPropertyItem(0x0112).Value[0];
-                        if (rotationValue != 1)
-                        {
-                            formatError = true;
-                        }
-                    }  
-                }
+                blobUrl = await this._photoService.AddPhotoBlob(uploadedPhoto, horseName, modifiedDate);
 
-                if (!formatError)
+                if (!String.IsNullOrEmpty(blobUrl)) // photo saved successfully
                 {
-                    blobUrl = await this._photoService.AddPhotoBlob(uploadedPhoto, horseName, modifiedDate);
-
-                    if (!String.IsNullOrEmpty(blobUrl)) // photo saved successfully
+                    if (oldImageUrl != null)
                     {
-                        if (oldImageUrl != null)
-                        {
-                            await this._photoService.RemovePhotoBlob(oldImageUrl);
-                        }
+                        await this._photoService.RemovePhotoBlob(oldImageUrl);
                     }
-                } 
- 
+                }
             }
+
             catch (Exception e)
             {
                 blobUrl = null;

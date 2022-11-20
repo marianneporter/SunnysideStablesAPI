@@ -101,13 +101,10 @@ namespace SunnysideStablesAPI
             app.UseHttpsRedirection();
 
             app.UseRouting();
-
-            //if (env.IsDevelopment())
-            //{
-            //    app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
-            //}
-
-            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+ 
+            app.UseCors(x => x.WithOrigins(Configuration.GetValue<string>("AllowedOrigin"))
+                                .AllowAnyMethod()
+                                .AllowAnyHeader());
 
             app.UseAuthentication();
             app.UseAuthorization();
