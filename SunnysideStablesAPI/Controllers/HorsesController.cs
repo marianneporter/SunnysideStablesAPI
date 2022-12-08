@@ -142,6 +142,12 @@ namespace SunnysideStablesAPI.Controllers
                 }
             } 
 
+            if (horseAddUpdateDto.PhotoReset)
+            {
+                await this._photoService.RemovePhotoBlob(horseToUpdate.ImageUrl);
+                horseToUpdate.ImageUrl = null;
+            }
+
             var updateSuccess =await _repo.Commit();
 
             if (!updateSuccess)
