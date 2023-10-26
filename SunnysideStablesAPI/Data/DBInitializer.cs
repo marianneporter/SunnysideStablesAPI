@@ -133,8 +133,8 @@ namespace SunnysideStablesAPI.Data
         }
 
         public static async Task InitializeIdentity(UserManager<User> userManager,
-                                                          RoleManager<Role> roleManager,
-                                                          IConfiguration config)
+                                                    RoleManager<Role> roleManager,
+                                                    IConfiguration config)
         {
             User managerUser = await userManager.FindByEmailAsync("manager@sunnystables.com");
 

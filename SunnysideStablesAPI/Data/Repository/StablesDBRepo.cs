@@ -24,6 +24,7 @@ namespace SunnysideStablesAPI.Data.Repository
 
             var totalHorses = query.Count();
 
+
             if (!String.IsNullOrEmpty(search))
             {
                 query = query.Where(h => h.Name.ToLower().StartsWith(search));
